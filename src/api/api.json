@@ -1,0 +1,5 @@
+{
+  "api": "https://www.omdbapi.com",
+  "key": "/?apikey=eb5cef08",
+  "apiWithAccess": "https://www.omdbapi.com/?apikey=eb5cef08"
+}
