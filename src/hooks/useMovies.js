@@ -1,18 +1,28 @@
-import api from '../api/api.json';
-import { useEffect, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { searchMovies } from '../services/movies';
 
-export const useMovies = ({ query = '' }) => {
-  const [movies, setMovies] = useState(null);
+export const useMovies = ({ search = '', sort }) => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const previousSearch = useRef(search);
 
-  useEffect(() => {
-    if (query === '') return;
+  const getMovies = useMemo(() => {
+    return async ({ search }) => {
+      if (search.trim().length < 3) return;
+      if (previousSearch.current === search) return;
 
-    fetch(`${api.apiWithAccess}&s=${query}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMovies(data);
-      });
-  }, [query]);
+      setLoading(true);
+      previousSearch.current = search;
+      const respMovies = await searchMovies({ search });
+      setMovies(respMovies);
 
-  return { movies: movies?.Search };
+      setLoading(false);
+    };
+  }, []);
+
+  const sortedMovies = useMemo(() => {
+    return sort ? [...movies].sort((a, b) => a.title.localeCompare(b.title)) : movies;
+  }, [sort, movies]);
+
+  return { movies: sortedMovies, loading, getMovies };
 };
