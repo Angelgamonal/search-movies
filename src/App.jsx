@@ -1,13 +1,21 @@
+import { useCallback, useState } from 'react';
+import debounce from 'just-debounce-it';
 import { useMovies } from './hooks/useMovies';
 import { useSearch } from './hooks/useSearch';
 import { ListOfMovies } from './components/ListOfMovies';
 import './App.css';
-import { useState } from 'react';
 
 function App() {
   const [sort, setSort] = useState(false);
   const { error, search, setSearch } = useSearch();
   const { movies, loading, getMovies } = useMovies({ search, sort });
+
+  const debounceGetMovies = useCallback(
+    debounce((search) => {
+      getMovies({ search });
+    }, 300),
+    [],
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,8 +26,9 @@ function App() {
   const handleChange = (e) => {
     const newQuery = e.target.value;
     if (newQuery.startsWith(' ')) return;
-
     setSearch(newQuery);
+
+    debounceGetMovies(newQuery);
   };
 
   const handleCheckBox = () => {
